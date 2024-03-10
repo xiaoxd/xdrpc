@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,16 +28,25 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private RpcResponse invokeRequest(RpcRequest request) {
+        //排除内置方法
+        if(Arrays.stream(Object.class.getMethods()).anyMatch(q->q.getName().equals(request.getMethod()))) {
+            return null;
+        }
+
         Object bean = skeletons.get(request.getService());
+        RpcResponse rpcResponse = new RpcResponse();
         try {
             Method method = getMethod(request.getMethod(), bean);
             Object result = method.invoke(bean, request.getArgs());
-            return new RpcResponse(true, result);
+            rpcResponse.setStatus(true);
+            rpcResponse.setData(result);
+            return rpcResponse;
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
+            rpcResponse.setEx(new RuntimeException(e.getTargetException().getMessage()));
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            rpcResponse.setEx(new RuntimeException(e.getMessage()));
         }
+        return rpcResponse;
     }
 
     private Method getMethod(String methodName, Object bean) {
@@ -52,7 +62,6 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private void buildProviders() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(XdProvider.class);
         providers.forEach((x,y)-> System.out.println(x));
-//		skeletons.putAll(providers);
 
         providers.values().forEach(this::getInterface);
     }

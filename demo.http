@@ -4,5 +4,5 @@ Content-Type: application/json
 {
   "service": "cn.xxd.xdrpc.demo.api.UserService",
   "method": "findById",
-  "args": [10000]
+  "args": [10090]
 }

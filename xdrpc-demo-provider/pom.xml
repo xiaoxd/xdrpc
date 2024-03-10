@@ -6,9 +6,7 @@
 		<groupId>cn.xxd</groupId>
 		<artifactId>xdrpc</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-<!--		<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
 	</parent>
-	<groupId>cn.xxd</groupId>
 	<artifactId>xdrpc-demo-provider</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>xdrpc-demo-provider</name>
