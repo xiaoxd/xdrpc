@@ -1,0 +1,8 @@
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "service": "cn.xxd.xdrpc.demo.api.UserService",
+  "method": "findById",
+  "args": [10090]
+}
