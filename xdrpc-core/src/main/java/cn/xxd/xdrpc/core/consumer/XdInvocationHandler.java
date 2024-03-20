@@ -3,11 +3,14 @@ package cn.xxd.xdrpc.core.consumer;
 import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
 import cn.xxd.xdrpc.core.util.MethodUtils;
+import cn.xxd.xdrpc.core.util.TypeUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -35,14 +38,22 @@ public class XdInvocationHandler implements InvocationHandler {
         rpcRequest.setArgs(args);
 
         RpcResponse rpcResponse = post(rpcRequest);
+        System.out.println(rpcResponse);
         //成功或者失败
         if(rpcResponse.isStatus()) {
             //兼容非json的基本类型
-            if(rpcResponse.getData() instanceof JSONObject) {
-                JSONObject responseJson = (JSONObject) rpcResponse.getData();
-                return responseJson.toJavaObject(method.getReturnType());
+            if(rpcResponse.getData() instanceof JSONObject jsonObject) {
+                return jsonObject.toJavaObject(method.getReturnType());
+            } else if(rpcResponse.getData() instanceof JSONArray jsonArray) {
+                Class<?> componentType = method.getReturnType().getComponentType();
+                Object[] array = jsonArray.toArray();
+                Object resultArray = Array.newInstance(componentType, array.length);
+                for (int i = 0; i < array.length; i++) {
+                    Array.set(resultArray, i, array[i]);
+                }
+                return resultArray;
             } else {
-                return rpcResponse.getData();
+                return TypeUtils.cast(rpcResponse.getData(), method.getReturnType());
             }
         } else {
             Exception ex = rpcResponse.getEx();

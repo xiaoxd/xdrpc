@@ -4,7 +4,13 @@ package cn.xxd.xdrpc.demo.api;
 public interface UserService {
     User findById(int id);
     User findById(int id, String name);
-    int getId(int id);
+    long getId(long id);
+    long getId(float id);
+    long getId(User user);
     String getName();
     String getName(int id);
+    int[] getIDs();
+    int[] getIDs(int[] ids);
+    long[] getLongIDs();
+    long[] getLongIDs(long[] ids);
 }
