@@ -2,6 +2,7 @@ package cn.xxd.xdrpc.core.consumer;
 
 import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
+import cn.xxd.xdrpc.core.util.MethodUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.*;
@@ -9,7 +10,6 @@ import okhttp3.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class XdInvocationHandler implements InvocationHandler {
@@ -26,12 +26,12 @@ public class XdInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         //处理内置方法，如 toString hashCode等Object的基本方法
         String methodName = method.getName();
-        if(Arrays.stream(Object.class.getMethods()).anyMatch(q->q.getName().equals(methodName))) {
+        if(MethodUtils.checkLocalMethod(methodName)) {
             return null;
         }
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setService(service.getCanonicalName());
-        rpcRequest.setMethod(methodName);
+        rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
         RpcResponse rpcResponse = post(rpcRequest);

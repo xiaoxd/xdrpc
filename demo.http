@@ -3,6 +3,16 @@ Content-Type: application/json
 
 {
   "service": "cn.xxd.xdrpc.demo.api.UserService",
-  "method": "findById",
+  "methodSign": "findById@1_int",
   "args": [10090]
+}
+
+### xxx
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+"service": "cn.xxd.xdrpc.demo.api.UserService",
+"methodSign": "findById@2_int_java.lang.String",
+"args": [10090, "dd"]
 }

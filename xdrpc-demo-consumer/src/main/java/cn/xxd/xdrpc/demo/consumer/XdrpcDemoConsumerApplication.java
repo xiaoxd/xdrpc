@@ -30,20 +30,21 @@ public class XdrpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner consumerRunner() {
         return x -> {
-            User user = userService.findById(1);
-            System.out.println(user);
+            System.out.println(userService.findById(1));
+            System.out.println(userService.findById(11, "cindy"));
+            System.out.println(userService.getName(123));
 
-            Order order = orderService.findById(100);
-            System.out.println(order);
-
-            String string = userService.toString();
-            System.out.println(string);
-
-            int id = userService.getId(999);
-            System.out.println(id);
-
-            String name = userService.getName();
-            System.out.println(name);
+//            Order order = orderService.findById(100);
+//            System.out.println(order);
+//
+//            String string = userService.toString();
+//            System.out.println(string);
+//
+//            int id = userService.getId(999);
+//            System.out.println(id);
+//
+//            String name = userService.getName();
+//            System.out.println(name);
 
 //            Order order404 = orderService.findById(404);
 //            System.out.println(order404);
