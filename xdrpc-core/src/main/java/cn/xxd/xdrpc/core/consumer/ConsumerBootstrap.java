@@ -2,6 +2,7 @@ package cn.xxd.xdrpc.core.consumer;
 
 import cn.xxd.xdrpc.core.annotation.XdConsumer;
 import cn.xxd.xdrpc.core.api.LoadBalancer;
+import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.api.Router;
 import cn.xxd.xdrpc.core.api.RpcContext;
 import lombok.Data;
@@ -26,12 +27,13 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     public void start() {
         Router router = applicationContext.getBean(Router.class);
         LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
 
-        String urls = environment.getProperty("xdrpc.providers", "");
-        if(Strings.isEmpty(urls)) {
-            System.err.println("xdrpc.providers is empty");
-        }
-        List<String> providers = Arrays.stream(urls.split(",")).toList();
+//        String urls = environment.getProperty("xdrpc.providers", "");
+//        if(Strings.isEmpty(urls)) {
+//            System.err.println("xdrpc.providers is empty");
+//        }
+//        List<String> providers = Arrays.stream(urls.split(",")).toList();
 
         RpcContext context = new RpcContext();
         context.setRouter(router);
@@ -47,7 +49,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                     String serviceName = service.getCanonicalName();
                     Object consumer = stub.get(serviceName);
                     if(consumer == null) {
-                        consumer = createConsumer(service, context, providers);
+                        consumer = createFromRegister(service, context, rc);
                         f.setAccessible(true);
                         f.set(bean, consumer);
                     }
@@ -57,6 +59,16 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                 }
             });
         }
+    }
+
+    private Object createFromRegister(Class<?> service, RpcContext context, RegisterCenter rc) {
+
+        List<String> providers = rc.fetchAll(service.getCanonicalName());
+        if(providers == null || providers.isEmpty()) {
+            System.err.println("no provider found for " + service.getCanonicalName());
+            return null;
+        }
+        return createConsumer(service, context, providers);
     }
 
     private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
