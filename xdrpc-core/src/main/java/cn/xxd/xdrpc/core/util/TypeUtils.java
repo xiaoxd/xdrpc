@@ -1,10 +1,13 @@
 package cn.xxd.xdrpc.core.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.List;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class TypeUtils {
     public static Object cast(Object origin, Class<?> type) {
@@ -32,6 +35,10 @@ public class TypeUtils {
             return jsonObject.toJavaObject(type);
         }
 
+        if(origin instanceof JSONObject jsonObject) {
+            return jsonObject.toJavaObject(type);
+        }
+
         if(type.equals(Long.class) || type.equals(Long.TYPE)) {
             return Long.valueOf(origin.toString());
         }
@@ -54,5 +61,52 @@ public class TypeUtils {
             return Character.valueOf(origin.toString().charAt(0));
         }
         return null;
+    }
+
+    public static Object castMethodResult(Method method, Object data) {
+        //兼容非json的基本类型
+        Class<?> type = method.getReturnType();
+        Type genericReturnType = method.getGenericReturnType();
+        if(data instanceof JSONObject jsonObject) {
+            if(Map.class.isAssignableFrom(type)) {
+                Map resultMap = new HashMap();
+                if(genericReturnType instanceof ParameterizedType parameterizedType) {
+                    Class<?> keyType = (Class<?>)parameterizedType.getActualTypeArguments()[0];
+                    Class<?> valueType = (Class<?>)parameterizedType.getActualTypeArguments()[1];
+                    jsonObject.entrySet().stream().forEach(q-> {
+                        resultMap.put(cast(q.getKey(), keyType), cast(q.getValue(), valueType));
+                    });
+                }
+            }
+            return jsonObject.toJavaObject(type);
+        } else if(data instanceof JSONArray jsonArray) {
+            Object[] array = jsonArray.toArray();
+            if(type.isArray()) {
+                Class<?> componentType = type.getComponentType();
+                Object resultArray = Array.newInstance(componentType, array.length);
+                for (int i = 0; i < array.length; i++) {
+                    Array.set(resultArray, i, array[i]);
+                }
+                return resultArray;
+            }
+            else if(List.class.isAssignableFrom(type)) {
+                List<Object> resultList = new ArrayList<>(array.length);
+                if(genericReturnType instanceof ParameterizedType parameterizedType) {
+                    Type actualType = parameterizedType.getActualTypeArguments()[0];
+                    for (Object o: array) {
+                        resultList.add(TypeUtils.cast(o, (Class<?>) actualType));
+                    }
+                }
+                else {
+                    resultList.addAll(Arrays.asList(array));
+                }
+                return resultList;
+            }
+            else {
+                return null;
+            }
+        } else {
+            return cast(data, type);
+        }
     }
 }

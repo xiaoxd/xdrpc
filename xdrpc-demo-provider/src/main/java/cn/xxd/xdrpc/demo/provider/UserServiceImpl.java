@@ -3,19 +3,27 @@ package cn.xxd.xdrpc.demo.provider;
 import cn.xxd.xdrpc.core.annotation.XdProvider;
 import cn.xxd.xdrpc.demo.api.User;
 import cn.xxd.xdrpc.demo.api.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @XdProvider
 public class UserServiceImpl implements UserService {
+    @Autowired
+    Environment environment;
     @Override
     public User findById(int id) {
-        return new User(id, "xxd-" + System.currentTimeMillis());
+        return new User(id, "xxd-" + environment.getProperty("server.port") +
+                "-" + System.currentTimeMillis());
     }
 
     @Override
     public User findById(int id, String name) {
-        return new User(id, "xxd-" + name + System.currentTimeMillis());
+        return new User(id, "xxd-" + environment.getProperty("server.port")
+                + "-" + name + System.currentTimeMillis());
     }
 
     @Override
@@ -61,5 +69,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public long[] getLongIDs(long[] ids) {
         return ids;
+    }
+
+    @Override
+    public List<User> getUsers(List<User> users) {
+        return users;
     }
 }

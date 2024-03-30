@@ -1,4 +1,4 @@
-POST http://localhost:8080
+POST http://localhost:8082
 Content-Type: application/json
 
 {
@@ -7,8 +7,8 @@ Content-Type: application/json
   "args": [10090]
 }
 
-### xxx
-POST http://localhost:8080
+### 获取8081用户信息
+POST http://localhost:8081
 Content-Type: application/json
 
 {
@@ -16,3 +16,16 @@ Content-Type: application/json
 "methodSign": "findById@2_int_java.lang.String",
 "args": [10090, "dd"]
 }
+
+### 获取8082用户信息
+POST http://localhost:8082
+Content-Type: application/json
+
+{
+  "service": "cn.xxd.xdrpc.demo.api.UserService",
+  "methodSign": "findById@2_int_java.lang.String",
+  "args": [10090, "dd"]
+}
+
+### 获取8088的用户信息
+GET http://localhost:8088/?id=88

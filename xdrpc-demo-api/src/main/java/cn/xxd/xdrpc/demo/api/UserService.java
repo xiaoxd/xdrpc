@@ -1,6 +1,8 @@
 package cn.xxd.xdrpc.demo.api;
 
 
+import java.util.List;
+
 public interface UserService {
     User findById(int id);
     User findById(int id, String name);
@@ -13,4 +15,5 @@ public interface UserService {
     int[] getIDs(int[] ids);
     long[] getLongIDs();
     long[] getLongIDs(long[] ids);
+    List<User> getUsers(List<User> users);
 }

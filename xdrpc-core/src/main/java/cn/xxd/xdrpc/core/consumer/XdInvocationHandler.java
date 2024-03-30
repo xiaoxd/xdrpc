@@ -1,7 +1,6 @@
 package cn.xxd.xdrpc.core.consumer;
 
-import cn.xxd.xdrpc.core.api.RpcRequest;
-import cn.xxd.xdrpc.core.api.RpcResponse;
+import cn.xxd.xdrpc.core.api.*;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import cn.xxd.xdrpc.core.util.TypeUtils;
 import com.alibaba.fastjson.JSON;
@@ -10,19 +9,24 @@ import com.alibaba.fastjson.JSONObject;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class XdInvocationHandler implements InvocationHandler {
 
     final static MediaType JSONTYPE = MediaType.get("application/json; charset=utf-8");
+    private RpcContext context;
+    private List<String> providers;
 
     Class<?> service;
 
-    public XdInvocationHandler(Class<?> service) {
+    public XdInvocationHandler(Class<?> service, RpcContext context, List<String> providers) {
         this.service = service;
+        this.context = context;
+        this.providers = providers;
     }
 
     @Override
@@ -37,24 +41,14 @@ public class XdInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
-        RpcResponse rpcResponse = post(rpcRequest);
+        List<String> urls = context.getRouter().route(providers);
+        String url = context.getLoadBalancer().choose(urls);
+        System.out.println("Load balance url: " + url);
+        RpcResponse rpcResponse = post(rpcRequest, url);
         System.out.println(rpcResponse);
         //成功或者失败
         if(rpcResponse.isStatus()) {
-            //兼容非json的基本类型
-            if(rpcResponse.getData() instanceof JSONObject jsonObject) {
-                return jsonObject.toJavaObject(method.getReturnType());
-            } else if(rpcResponse.getData() instanceof JSONArray jsonArray) {
-                Class<?> componentType = method.getReturnType().getComponentType();
-                Object[] array = jsonArray.toArray();
-                Object resultArray = Array.newInstance(componentType, array.length);
-                for (int i = 0; i < array.length; i++) {
-                    Array.set(resultArray, i, array[i]);
-                }
-                return resultArray;
-            } else {
-                return TypeUtils.cast(rpcResponse.getData(), method.getReturnType());
-            }
+            return TypeUtils.castMethodResult(method, rpcResponse.getData());
         } else {
             Exception ex = rpcResponse.getEx();
             throw new RuntimeException(ex);
@@ -68,10 +62,10 @@ public class XdInvocationHandler implements InvocationHandler {
             .connectTimeout(1, TimeUnit.SECONDS)
             .build();
 
-    private RpcResponse post(RpcRequest rpcRequest) {
+    private RpcResponse post(RpcRequest rpcRequest, String url) {
         String requestJson = JSON.toJSONString(rpcRequest);
         Request request = new Request.Builder()
-                .url("http://localhost:8080/")
+                .url(url)
                 .post(RequestBody.create(requestJson, JSONTYPE))
                 .build();
         try {
