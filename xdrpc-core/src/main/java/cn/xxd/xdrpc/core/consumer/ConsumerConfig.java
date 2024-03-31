@@ -44,7 +44,7 @@ public class ConsumerConfig {
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public RegisterCenter registerCenter() {
+    public RegisterCenter consumer_rc() {
         return new RegisterCenter.StaticRegisterCenter(List.of(servers.split(",")));
     }
 }

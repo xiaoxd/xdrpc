@@ -2,6 +2,11 @@ package cn.xxd.xdrpc.core.api;
 
 import java.util.List;
 
+/**
+ * RegisterCenter
+ * @author xiaoxd
+ * @create 2024-03-30
+ */
 public interface RegisterCenter {
     void start();
     void stop();
