@@ -17,7 +17,6 @@ public class ZKRegisterCenter implements RegisterCenter {
 
     @Override
     public void register(String service, String instance) {
-
     }
 
     @Override
