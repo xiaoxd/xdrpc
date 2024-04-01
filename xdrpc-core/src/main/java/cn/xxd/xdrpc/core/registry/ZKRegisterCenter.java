@@ -6,6 +6,7 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkImpl;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
@@ -82,8 +83,23 @@ public class ZKRegisterCenter implements RegisterCenter {
         }
     }
 
+    @SneakyThrows
     @Override
-    public void subscribe(String service, String instance) {
-
+    public void subscribe(String service, ChangedListener listener) {
+        final TreeCache cache = TreeCache.newBuilder(client, "/" + service).setCacheData(true).setMaxDepth(2).build();
+        cache.getListenable().addListener((curator, event) -> {
+            System.out.println("zk subscribe event: " + event);
+            switch (event.getType()) {
+                case NODE_ADDED:
+                case NODE_REMOVED:
+                case NODE_UPDATED:
+                    List<String> instances = fetchAll(service);
+                    listener.fire(new Event(instances));
+                    break;
+                default:
+                    break;
+            }
+        });
+        cache.start();
     }
 }

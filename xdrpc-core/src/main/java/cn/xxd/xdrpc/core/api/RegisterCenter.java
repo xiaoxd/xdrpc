@@ -1,5 +1,7 @@
 package cn.xxd.xdrpc.core.api;
 
+import cn.xxd.xdrpc.core.registry.ChangedListener;
+
 import java.util.List;
 
 /**
@@ -18,7 +20,7 @@ public interface RegisterCenter {
 
     //consumer
     List<String> fetchAll(String service);
-    void subscribe(String service, String instance);
+    void subscribe(String service, ChangedListener listener);
 
     class StaticRegisterCenter implements RegisterCenter {
 
@@ -58,7 +60,7 @@ public interface RegisterCenter {
         }
 
         @Override
-        public void subscribe(String service, String instance) {
+        public void subscribe(String service, ChangedListener listener) {
 
         }
     }

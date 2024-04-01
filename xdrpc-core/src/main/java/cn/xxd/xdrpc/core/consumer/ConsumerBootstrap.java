@@ -7,6 +7,7 @@ import cn.xxd.xdrpc.core.api.Router;
 import cn.xxd.xdrpc.core.api.RpcContext;
 import lombok.Data;
 import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
@@ -58,15 +59,24 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegister(Class<?> service, RpcContext context, RegisterCenter rc) {
 
-        List<String> nodes = rc.fetchAll(service.getCanonicalName());
+        String serviceName = service.getCanonicalName();
+        List<String> nodes = rc.fetchAll(serviceName);
         if(nodes == null || nodes.isEmpty()) {
-            System.err.println("no provider found for " + service.getCanonicalName());
+            System.err.println("no provider found for " + serviceName);
             return null;
         }
-        List<String> providers = nodes.stream().map(q -> "http://" + q.replace('_', ':')).collect(Collectors.toList());
-        System.out.println("maps to providers: " + service.getCanonicalName());
+        List<String> providers = mapUrls(nodes);
+        System.out.println("maps to providers: " + serviceName);
         providers.forEach(System.out::println);
+        rc.subscribe(serviceName, event -> {
+            providers.clear();
+            providers.addAll(mapUrls(event.getNodes()));
+        });
         return createConsumer(service, context, providers);
+    }
+
+    private static List<String> mapUrls(List<String> nodes) {
+        return nodes.stream().map(q -> "http://" + q.replace('_', ':')).collect(Collectors.toList());
     }
 
     private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
