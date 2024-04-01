@@ -15,6 +15,7 @@ import org.springframework.core.env.Environment;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
@@ -28,12 +29,6 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         Router router = applicationContext.getBean(Router.class);
         LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
         RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
-
-//        String urls = environment.getProperty("xdrpc.providers", "");
-//        if(Strings.isEmpty(urls)) {
-//            System.err.println("xdrpc.providers is empty");
-//        }
-//        List<String> providers = Arrays.stream(urls.split(",")).toList();
 
         RpcContext context = new RpcContext();
         context.setRouter(router);
@@ -63,11 +58,14 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegister(Class<?> service, RpcContext context, RegisterCenter rc) {
 
-        List<String> providers = rc.fetchAll(service.getCanonicalName());
-        if(providers == null || providers.isEmpty()) {
+        List<String> nodes = rc.fetchAll(service.getCanonicalName());
+        if(nodes == null || nodes.isEmpty()) {
             System.err.println("no provider found for " + service.getCanonicalName());
             return null;
         }
+        List<String> providers = nodes.stream().map(q -> "http://" + q.replace('_', ':')).collect(Collectors.toList());
+        System.out.println("maps to providers: " + service.getCanonicalName());
+        providers.forEach(System.out::println);
         return createConsumer(service, context, providers);
     }
 

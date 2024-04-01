@@ -1,13 +1,17 @@
 package cn.xxd.xdrpc.core.provider;
 
 import cn.xxd.xdrpc.core.annotation.XdProvider;
+import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
 import cn.xxd.xdrpc.core.meta.ProviderMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import cn.xxd.xdrpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Data;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.*;
 
 @Data
@@ -23,6 +28,9 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     private LinkedMultiValueMap<String, ProviderMeta> skeletons = new LinkedMultiValueMap<>();
+    private String instance;
+    @Value("${server.port}")
+    private String port;
 
     public RpcResponse invoke(@RequestBody RpcRequest request) {
         return invokeRequest(request);
@@ -65,11 +73,34 @@ public class ProviderBootstrap implements ApplicationContextAware {
         return optionalProviderMeta.orElse(null);
     }
 
+    @SneakyThrows
     @PostConstruct  //init method，对应的是PreDestroy
-    private void start() {
+    private void init() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(XdProvider.class);
 
         providers.values().forEach(this::getInterface);
+    }
+
+    @PreDestroy
+    public void stop() {
+        skeletons.keySet().forEach(this::unRegisterService);
+    }
+
+    @SneakyThrows
+    public void start() {
+        String ip = InetAddress.getLocalHost().getHostAddress();
+        instance = ip + "_" + port;
+        skeletons.keySet().forEach(this::registerService);
+    }
+
+    private void registerService(String service) {
+        RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
+        rc.register(service, instance);
+    }
+
+    private void unRegisterService(String service) {
+        RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
+        rc.unRegister(service, instance);
     }
 
     private void getInterface(Object x) {

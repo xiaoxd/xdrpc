@@ -1,6 +1,7 @@
 package cn.xxd.xdrpc.core.registry;
 
 import cn.xxd.xdrpc.core.api.RegisterCenter;
+import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -10,6 +11,9 @@ import org.apache.zookeeper.CreateMode;
 
 import java.util.List;
 
+/**
+ * 服务提供者
+ */
 public class ZKRegisterCenter implements RegisterCenter {
     private CuratorFramework client = null;
     @Override
@@ -22,6 +26,8 @@ public class ZKRegisterCenter implements RegisterCenter {
                 .connectionTimeoutMs(5000)
                 .retryPolicy(retryPolicy)
                 .build();
+        client.start();
+        System.out.println("zk client started success");
     }
 
     @Override
@@ -39,6 +45,7 @@ public class ZKRegisterCenter implements RegisterCenter {
             }
             //创建实例的临时节点
             client.create().withMode(CreateMode.EPHEMERAL).forPath(servicePath + "/" + instance, "provider".getBytes());
+            System.out.println("Register to ZK: " + service + " - " + instance + " success!");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -54,6 +61,7 @@ public class ZKRegisterCenter implements RegisterCenter {
             }
             //删除实例的临时节点
             client.delete().quietly().forPath(servicePath + "/" + instance);
+            System.out.println("unRegister from ZK: " + service + " - " + instance + " success!");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +74,12 @@ public class ZKRegisterCenter implements RegisterCenter {
 
     @Override
     public List<String> fetchAll(String service) {
-        return null;
+        String servicePath = "/" + service;
+        try {
+            return client.getChildren().forPath(servicePath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
