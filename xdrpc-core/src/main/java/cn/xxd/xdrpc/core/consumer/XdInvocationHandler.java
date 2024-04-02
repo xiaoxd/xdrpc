@@ -20,7 +20,6 @@ public class XdInvocationHandler implements InvocationHandler {
     final static MediaType JSONTYPE = MediaType.get("application/json; charset=utf-8");
     private RpcContext context;
     private List<String> providers;
-
     Class<?> service;
 
     public XdInvocationHandler(Class<?> service, RpcContext context, List<String> providers) {

@@ -4,6 +4,7 @@ import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
 import cn.xxd.xdrpc.core.provider.ProviderBootstrap;
 import cn.xxd.xdrpc.core.provider.ProviderConfig;
+import cn.xxd.xdrpc.core.provider.ProviderInvoker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -24,12 +25,12 @@ public class XdrpcDemoProviderApplication {
 	}
 
 	@Autowired
-	ProviderBootstrap providerBootstrap;
+	ProviderInvoker invoke;
 
 	// 使用http + json实现序列化和通信
 	@RequestMapping("/")
 	public RpcResponse invoke(@RequestBody RpcRequest request) {
-		return providerBootstrap.invoke(request);
+		return invoke.invoke(request);
 	}
 
 	@Bean

@@ -26,75 +26,37 @@ import java.util.*;
 public class ProviderBootstrap implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
+    RegisterCenter rc;
 
     private LinkedMultiValueMap<String, ProviderMeta> skeletons = new LinkedMultiValueMap<>();
     private String instance;
     @Value("${server.port}")
     private String port;
 
-    public RpcResponse invoke(@RequestBody RpcRequest request) {
-        return invokeRequest(request);
-    }
-
-    private RpcResponse invokeRequest(RpcRequest request) {
-        //排除内置方法
-        if(MethodUtils.checkLocalMethod(request.getMethodSign())) {
-            return null;
-        }
-
-        RpcResponse rpcResponse = new RpcResponse();
-        try {
-            List<ProviderMeta> providerMetas = skeletons.get(request.getService());
-            ProviderMeta providerMeta = findProviderMeta(providerMetas, request.getMethodSign());
-            Object[] args = processArgs(request.getArgs(), providerMeta.getMethod().getParameterTypes());
-            Object result = providerMeta.getMethod().invoke(providerMeta.getServiceImpl(), args);
-            rpcResponse.setStatus(true);
-            rpcResponse.setData(result);
-            return rpcResponse;
-        } catch (InvocationTargetException e) {
-            rpcResponse.setEx(new RuntimeException(e.getTargetException().getMessage()));
-        } catch (IllegalAccessException e) {
-            rpcResponse.setEx(new RuntimeException(e.getMessage()));
-        }
-        return rpcResponse;
-    }
-
-    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
-        if(args == null || args.length == 0) return args;
-        Object[] actuals = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            actuals[i] = TypeUtils.cast(args[i], parameterTypes[i]);
-        }
-        return actuals;
-    }
-
-    private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
-        Optional<ProviderMeta> optionalProviderMeta = providerMetas.stream().filter(q -> q.getMethodSign().equalsIgnoreCase(methodSign)).findFirst();
-        return optionalProviderMeta.orElse(null);
-    }
-
     @SneakyThrows
     @PostConstruct  //init method，对应的是PreDestroy
     private void init() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(XdProvider.class);
-
+        rc = applicationContext.getBean(RegisterCenter.class);
         providers.values().forEach(this::getInterface);
-    }
-
-    @PreDestroy
-    public void stop() {
-        skeletons.keySet().forEach(this::unRegisterService);
     }
 
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
         instance = ip + "_" + port;
+        rc.start();
         skeletons.keySet().forEach(this::registerService);
     }
 
+    @PreDestroy
+    public void stop() {
+        System.out.println("ProviderBootstrap stop, unregister all services");
+        skeletons.keySet().forEach(this::unRegisterService);
+        rc.stop();
+    }
+
     private void registerService(String service) {
-        RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
         rc.register(service, instance);
     }
 

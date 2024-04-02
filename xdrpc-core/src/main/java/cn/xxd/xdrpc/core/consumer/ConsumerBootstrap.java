@@ -6,8 +6,6 @@ import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.api.Router;
 import cn.xxd.xdrpc.core.api.RpcContext;
 import lombok.Data;
-import org.apache.logging.log4j.util.Strings;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
@@ -17,6 +15,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static cn.xxd.xdrpc.core.util.MethodUtils.findAnnotatedField;
 
 @Data
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
@@ -38,7 +38,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
-            List<Field> fields = findAnnotatedField(bean.getClass());
+            List<Field> fields = findAnnotatedField(bean.getClass(), XdConsumer.class);
             fields.stream().forEach(f -> {
                 try{
                     Class<?> service = f.getType();
@@ -81,20 +81,5 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
         return Proxy.newProxyInstance(service.getClassLoader(), new Class[] {service}, new XdInvocationHandler(service, context, providers));
-    }
-
-    private List<Field> findAnnotatedField(Class<?> aClass) {
-        List<Field> result = new ArrayList<>();
-        Field[] fields = aClass.getDeclaredFields();
-        for (Field field : fields) {
-            if(field.isAnnotationPresent(XdConsumer.class)) {
-                result.add(field);
-            }
-        }
-        aClass = aClass.getSuperclass();
-        if(aClass != null) {
-            result.addAll(findAnnotatedField(aClass));
-        }
-        return result;
     }
 }
