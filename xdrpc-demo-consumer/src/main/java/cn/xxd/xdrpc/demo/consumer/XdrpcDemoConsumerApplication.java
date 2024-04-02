@@ -1,26 +1,18 @@
 package cn.xxd.xdrpc.demo.consumer;
 
 import cn.xxd.xdrpc.core.annotation.XdConsumer;
-import cn.xxd.xdrpc.core.api.RpcRequest;
-import cn.xxd.xdrpc.core.api.RpcResponse;
 import cn.xxd.xdrpc.core.consumer.ConsumerConfig;
-import cn.xxd.xdrpc.core.provider.ProviderBootstrap;
-import cn.xxd.xdrpc.demo.api.Order;
 import cn.xxd.xdrpc.demo.api.OrderService;
 import cn.xxd.xdrpc.demo.api.User;
 import cn.xxd.xdrpc.demo.api.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 @SpringBootApplication

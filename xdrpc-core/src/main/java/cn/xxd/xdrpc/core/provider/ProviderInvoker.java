@@ -5,7 +5,6 @@ import cn.xxd.xdrpc.core.api.RpcResponse;
 import cn.xxd.xdrpc.core.meta.ProviderMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import cn.xxd.xdrpc.core.util.TypeUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 

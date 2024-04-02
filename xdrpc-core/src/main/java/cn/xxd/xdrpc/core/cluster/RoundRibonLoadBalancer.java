@@ -3,7 +3,6 @@ package cn.xxd.xdrpc.core.cluster;
 import cn.xxd.xdrpc.core.api.LoadBalancer;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoundRibonLoadBalancer<T> implements LoadBalancer<T> {

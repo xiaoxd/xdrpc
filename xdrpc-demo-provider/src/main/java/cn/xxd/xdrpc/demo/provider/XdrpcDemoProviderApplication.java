@@ -2,7 +2,6 @@ package cn.xxd.xdrpc.demo.provider;
 
 import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
-import cn.xxd.xdrpc.core.provider.ProviderBootstrap;
 import cn.xxd.xdrpc.core.provider.ProviderConfig;
 import cn.xxd.xdrpc.core.provider.ProviderInvoker;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,5 @@
 package cn.xxd.xdrpc.core.util;
 
-import cn.xxd.xdrpc.core.annotation.XdConsumer;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
