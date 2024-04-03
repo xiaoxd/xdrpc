@@ -1,6 +1,7 @@
 package cn.xxd.xdrpc.core.api;
 
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
+import cn.xxd.xdrpc.core.meta.ServiceMeta;
 import cn.xxd.xdrpc.core.registry.ChangedListener;
 
 import java.util.List;
@@ -15,13 +16,13 @@ public interface RegisterCenter {
     void stop();
 
     //provider
-    void register(String service, InstanceMeta instance);
-    void unRegister(String service, InstanceMeta instance);
-    String discover(String serviceName);
+    void register(ServiceMeta service, InstanceMeta instance);
+    void unRegister(ServiceMeta service, InstanceMeta instance);
+    String discover(ServiceMeta service);
 
     //consumer
-    List<InstanceMeta> fetchAll(String service);
-    void subscribe(String service, ChangedListener listener);
+    List<InstanceMeta> fetchAll(ServiceMeta service);
+    void subscribe(ServiceMeta service, ChangedListener listener);
 
     class StaticRegisterCenter implements RegisterCenter {
 
@@ -41,27 +42,27 @@ public interface RegisterCenter {
         }
 
         @Override
-        public void register(String service, InstanceMeta instance) {
+        public void register(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public void unRegister(String service, InstanceMeta instance) {
+        public void unRegister(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public String discover(String serviceName) {
+        public String discover(ServiceMeta service) {
             return null;
         }
 
         @Override
-        public List<InstanceMeta> fetchAll(String service) {
+        public List<InstanceMeta> fetchAll(ServiceMeta service) {
             return providers;
         }
 
         @Override
-        public void subscribe(String service, ChangedListener listener) {
+        public void subscribe(ServiceMeta service, ChangedListener listener) {
 
         }
     }

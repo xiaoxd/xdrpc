@@ -2,6 +2,7 @@ package cn.xxd.xdrpc.core.registry;
 
 import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
+import cn.xxd.xdrpc.core.meta.ServiceMeta;
 import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -40,8 +41,8 @@ public class ZKRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public void register(String service, InstanceMeta instance) {
-        String servicePath = "/" + service;
+    public void register(ServiceMeta service, InstanceMeta instance) {
+        String servicePath = service.toPath();
         try {
             if(client.checkExists().forPath(servicePath) == null) {
                 //创建服务的持久化节点
@@ -57,8 +58,8 @@ public class ZKRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public void unRegister(String service, InstanceMeta instance) {
-        String servicePath = "/" + service;
+    public void unRegister(ServiceMeta service, InstanceMeta instance) {
+        String servicePath = service.toPath();
         try {
             //判断服务是否存在
             if(client.checkExists().forPath(servicePath) == null) {
@@ -74,13 +75,13 @@ public class ZKRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public String discover(String serviceName) {
+    public String discover(ServiceMeta serviceName) {
         return null;
     }
 
     @Override
-    public List<InstanceMeta> fetchAll(String service) {
-        String servicePath = "/" + service;
+    public List<InstanceMeta> fetchAll(ServiceMeta service) {
+        String servicePath = service.toPath();
         try {
             return mapInstances(servicePath);
         } catch (Exception e) {
@@ -99,7 +100,7 @@ public class ZKRegisterCenter implements RegisterCenter {
 
     @SneakyThrows
     @Override
-    public void subscribe(String service, ChangedListener listener) {
+    public void subscribe(ServiceMeta service, ChangedListener listener) {
         final TreeCache cache = TreeCache.newBuilder(client, "/" + service).setCacheData(true).setMaxDepth(2).build();
         cache.getListenable().addListener((curator, event) -> {
             System.out.println("zk subscribe event: " + event);

@@ -4,6 +4,7 @@ import cn.xxd.xdrpc.core.annotation.XdProvider;
 import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.meta.ProviderMeta;
+import cn.xxd.xdrpc.core.meta.ServiceMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -28,6 +29,14 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private InstanceMeta instance;
     @Value("${server.port}")
     private Integer port;
+    @Value("${app.id}")
+    private String app;
+    @Value("${app.namespace}")
+    private String namespace;
+    @Value("${app.env}")
+    private String env;
+    @Value("${app.version}")
+    private String version;
 
     @SneakyThrows
     @PostConstruct  //init method，对应的是PreDestroy
@@ -53,12 +62,18 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void registerService(String service) {
-        rc.register(service, instance);
+        ServiceMeta serviceMeta = toServiceMeta(service);
+        rc.register(serviceMeta, instance);
     }
 
     private void unRegisterService(String service) {
         RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
-        rc.unRegister(service, instance);
+        ServiceMeta serviceMeta = toServiceMeta(service);
+        rc.unRegister(serviceMeta, instance);
+    }
+
+    private ServiceMeta toServiceMeta(String service) {
+        return ServiceMeta.builder().app(app).namespace(namespace).env(env).version(version).name(service).build();
     }
 
     private void getInterface(Object x) {
