@@ -1,6 +1,10 @@
 server:
   port: 8081
 
+xdrpc:
+  zkService: localhost:2181
+  zkRoot: xdrpc
+
 app:
   id: app1
   namespace: public

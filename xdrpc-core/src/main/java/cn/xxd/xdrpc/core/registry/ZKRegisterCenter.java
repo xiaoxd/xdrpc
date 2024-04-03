@@ -11,6 +11,7 @@ import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,19 +21,25 @@ import java.util.stream.Stream;
  * 服务提供者
  */
 public class ZKRegisterCenter implements RegisterCenter {
+
+    @Value("${xdrpc.zkService}")
+    String zkService;
+
+    @Value("${xdrpc.zkRoot}")
+    String zkRoot;
     private CuratorFramework client = null;
     @Override
     public void start() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         client = CuratorFrameworkFactory.builder()
-                .connectString("localhost:2181")
-                .namespace("xdrpc")
+                .connectString(zkService)
+                .namespace(zkRoot)
                 .sessionTimeoutMs(5000)
                 .connectionTimeoutMs(5000)
                 .retryPolicy(retryPolicy)
                 .build();
         client.start();
-        System.out.println("zk client started success");
+        System.out.println("zk client started success, server[" + zkService + "], namespace[" + zkRoot + "]");
     }
 
     @Override
@@ -101,7 +108,7 @@ public class ZKRegisterCenter implements RegisterCenter {
     @SneakyThrows
     @Override
     public void subscribe(ServiceMeta service, ChangedListener listener) {
-        final TreeCache cache = TreeCache.newBuilder(client, "/" + service).setCacheData(true).setMaxDepth(2).build();
+        final TreeCache cache = TreeCache.newBuilder(client, service.toPath()).setCacheData(true).setMaxDepth(2).build();
         cache.getListenable().addListener((curator, event) -> {
             System.out.println("zk subscribe event: " + event);
             switch (event.getType()) {
