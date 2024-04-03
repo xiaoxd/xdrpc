@@ -33,12 +33,9 @@ public class InstanceMeta {
         return String.format("%s_%d", host, port);
     }
 
+    public String toUrl() { return String.format("%s://%s:%d/%s", scheme, host, port, context); }
+
     public static InstanceMeta http(String host, Integer port) {
         return new InstanceMeta("http", host, port, "");
     }
-
-     @Override
-    public String toString() {
-        return String.format("%s://%s:%d/%s", scheme, host, port, context);
-     }
 }

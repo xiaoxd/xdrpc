@@ -39,7 +39,7 @@ public class XdInvocationHandler implements InvocationHandler {
         List<InstanceMeta> instances = context.getRouter().route(providers);
         InstanceMeta instance = context.getLoadBalancer().choose(instances);
         System.out.println("Load balance url: " + instance);
-        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toString());
+        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
         System.out.println(rpcResponse);
         //成功或者失败
         if(rpcResponse.isStatus()) {
