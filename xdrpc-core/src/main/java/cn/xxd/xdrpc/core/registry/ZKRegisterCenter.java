@@ -1,6 +1,7 @@
 package cn.xxd.xdrpc.core.registry;
 
 import cn.xxd.xdrpc.core.api.RegisterCenter;
+import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -8,8 +9,11 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 服务提供者
@@ -36,7 +40,7 @@ public class ZKRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public void register(String service, String instance) {
+    public void register(String service, InstanceMeta instance) {
         String servicePath = "/" + service;
         try {
             if(client.checkExists().forPath(servicePath) == null) {
@@ -44,7 +48,8 @@ public class ZKRegisterCenter implements RegisterCenter {
                 client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, "service".getBytes());
             }
             //创建实例的临时节点
-            client.create().withMode(CreateMode.EPHEMERAL).forPath(servicePath + "/" + instance, "provider".getBytes());
+            String instancePath = servicePath + "/" + instance.toPath();
+            client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
             System.out.println("Register to ZK: " + service + " - " + instance + " success!");
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -52,7 +57,7 @@ public class ZKRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public void unRegister(String service, String instance) {
+    public void unRegister(String service, InstanceMeta instance) {
         String servicePath = "/" + service;
         try {
             //判断服务是否存在
@@ -60,7 +65,8 @@ public class ZKRegisterCenter implements RegisterCenter {
                 return;
             }
             //删除实例的临时节点
-            client.delete().quietly().forPath(servicePath + "/" + instance);
+            String instancePath = servicePath + "/" + instance.toPath();
+            client.delete().quietly().forPath(instancePath);
             System.out.println("unRegister from ZK: " + service + " - " + instance + " success!");
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -73,13 +79,22 @@ public class ZKRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public List<String> fetchAll(String service) {
+    public List<InstanceMeta> fetchAll(String service) {
         String servicePath = "/" + service;
         try {
-            return client.getChildren().forPath(servicePath);
+            return mapInstances(servicePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @NotNull
+    private List<InstanceMeta> mapInstances(String servicePath) throws Exception {
+        List<String> nodes = client.getChildren().forPath(servicePath);
+        return nodes.stream().map(q -> {
+            String[] strs = q.split("_");
+            return InstanceMeta.http(strs[0], Integer.valueOf(strs[1]));
+        }).collect(Collectors.toList());
     }
 
     @SneakyThrows
@@ -92,7 +107,7 @@ public class ZKRegisterCenter implements RegisterCenter {
                 case NODE_ADDED:
                 case NODE_REMOVED:
                 case NODE_UPDATED:
-                    List<String> instances = fetchAll(service);
+                    List<InstanceMeta> instances = fetchAll(service);
                     listener.fire(new Event(instances));
                     break;
                 default:

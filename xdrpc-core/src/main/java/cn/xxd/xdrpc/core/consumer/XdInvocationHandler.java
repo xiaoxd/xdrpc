@@ -3,6 +3,7 @@ package cn.xxd.xdrpc.core.consumer;
 import cn.xxd.xdrpc.core.api.RpcContext;
 import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
+import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import cn.xxd.xdrpc.core.util.TypeUtils;
 import cn.xxd.xdrpc.core.consumer.http.OkHttpInvoker;
@@ -14,10 +15,10 @@ import java.util.List;
 public class XdInvocationHandler implements InvocationHandler {
     private HttpInvoker httpInvoker = new OkHttpInvoker();
     private RpcContext context;
-    private List<String> providers;
+    private List<InstanceMeta> providers;
     Class<?> service;
 
-    public XdInvocationHandler(Class<?> service, RpcContext context, List<String> providers) {
+    public XdInvocationHandler(Class<?> service, RpcContext context, List<InstanceMeta> providers) {
         this.service = service;
         this.context = context;
         this.providers = providers;
@@ -35,10 +36,10 @@ public class XdInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
-        List<String> urls = context.getRouter().route(providers);
-        String url = context.getLoadBalancer().choose(urls);
-        System.out.println("Load balance url: " + url);
-        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, url);
+        List<InstanceMeta> instances = context.getRouter().route(providers);
+        InstanceMeta instance = context.getLoadBalancer().choose(instances);
+        System.out.println("Load balance url: " + instance);
+        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toString());
         System.out.println(rpcResponse);
         //成功或者失败
         if(rpcResponse.isStatus()) {

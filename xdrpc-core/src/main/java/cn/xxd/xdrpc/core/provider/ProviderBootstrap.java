@@ -2,6 +2,7 @@ package cn.xxd.xdrpc.core.provider;
 
 import cn.xxd.xdrpc.core.annotation.XdProvider;
 import cn.xxd.xdrpc.core.api.RegisterCenter;
+import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.meta.ProviderMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import jakarta.annotation.PostConstruct;
@@ -24,9 +25,9 @@ public class ProviderBootstrap implements ApplicationContextAware {
     RegisterCenter rc;
 
     private LinkedMultiValueMap<String, ProviderMeta> skeletons = new LinkedMultiValueMap<>();
-    private String instance;
+    private InstanceMeta instance;
     @Value("${server.port}")
-    private String port;
+    private Integer port;
 
     @SneakyThrows
     @PostConstruct  //init method，对应的是PreDestroy
@@ -39,7 +40,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
-        instance = ip + "_" + port;
+        instance = InstanceMeta.http(ip, port);
         rc.start();
         skeletons.keySet().forEach(this::registerService);
     }

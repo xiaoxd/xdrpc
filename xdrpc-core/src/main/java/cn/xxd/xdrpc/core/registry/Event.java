@@ -1,5 +1,6 @@
 package cn.xxd.xdrpc.core.registry;
 
+import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,5 +13,5 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class Event {
-    List<String> nodes;
+    List<InstanceMeta> nodes;
 }
