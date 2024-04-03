@@ -4,7 +4,9 @@ Content-Type: application/json
 {
   "service": "cn.xxd.xdrpc.demo.api.UserService",
   "methodSign": "findById@1_int",
-  "args": [10090]
+  "args": [
+    10090
+  ]
 }
 
 ### 获取8081用户信息
@@ -12,9 +14,12 @@ POST http://localhost:8081
 Content-Type: application/json
 
 {
-"service": "cn.xxd.xdrpc.demo.api.UserService",
-"methodSign": "findById@2_int_java.lang.String",
-"args": [10090, "dd"]
+  "service": "cn.xxd.xdrpc.demo.api.UserService",
+  "methodSign": "findById@2_int_java.lang.String",
+  "args": [
+    10090,
+    "dd"
+  ]
 }
 
 ### 获取8082用户信息
@@ -24,7 +29,10 @@ Content-Type: application/json
 {
   "service": "cn.xxd.xdrpc.demo.api.UserService",
   "methodSign": "findById@2_int_java.lang.String",
-  "args": [10090, "dd"]
+  "args": [
+    10090,
+    "dd"
+  ]
 }
 
 ### 获取8088的用户信息

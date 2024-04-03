@@ -19,15 +19,14 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static cn.xxd.xdrpc.core.util.MethodUtils.findAnnotatedField;
 
 @Data
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 
-    private ApplicationContext applicationContext;
     Environment environment;
+    private ApplicationContext applicationContext;
     @Value("${app.id}")
     private String app;
     @Value("${app.namespace}")
@@ -53,18 +52,17 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
             Object bean = applicationContext.getBean(name);
             List<Field> fields = findAnnotatedField(bean.getClass(), XdConsumer.class);
             fields.stream().forEach(f -> {
-                try{
+                try {
                     Class<?> service = f.getType();
                     String serviceName = service.getCanonicalName();
                     Object consumer = stub.get(serviceName);
-                    if(consumer == null) {
+                    if (consumer == null) {
                         consumer = createFromRegister(service, context, rc);
                         f.setAccessible(true);
                         f.set(bean, consumer);
                         stub.put(serviceName, consumer);
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             });
@@ -79,7 +77,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         String serviceName = service.getCanonicalName();
         ServiceMeta serviceMeta = toServiceMeta(serviceName);
         List<InstanceMeta> nodes = rc.fetchAll(serviceMeta);
-        if(nodes == null || nodes.isEmpty()) {
+        if (nodes == null || nodes.isEmpty()) {
             System.err.println("no provider found for " + serviceName);
             return null;
         }
@@ -93,6 +91,6 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     }
 
     private Object createConsumer(Class<?> service, RpcContext context, List<InstanceMeta> providers) {
-        return Proxy.newProxyInstance(service.getClassLoader(), new Class[] {service}, new XdInvocationHandler(service, context, providers));
+        return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service}, new XdInvocationHandler(service, context, providers));
     }
 }

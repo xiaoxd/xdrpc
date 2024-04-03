@@ -23,12 +23,12 @@ public class MethodUtils {
         List<Field> result = new ArrayList<>();
         Field[] fields = aClass.getDeclaredFields();
         for (Field field : fields) {
-            if(field.isAnnotationPresent(annotationClass)) {
+            if (field.isAnnotationPresent(annotationClass)) {
                 result.add(field);
             }
         }
         aClass = aClass.getSuperclass();
-        if(aClass != null) {
+        if (aClass != null) {
             result.addAll(findAnnotatedField(aClass, annotationClass));
         }
         return result;

@@ -30,7 +30,7 @@ public class ProviderInvoker {
 
     private RpcResponse invokeRequest(RpcRequest request) {
         //排除内置方法
-        if(MethodUtils.checkLocalMethod(request.getMethodSign())) {
+        if (MethodUtils.checkLocalMethod(request.getMethodSign())) {
             return null;
         }
 
@@ -52,7 +52,7 @@ public class ProviderInvoker {
     }
 
     private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
-        if(args == null || args.length == 0) return args;
+        if (args == null || args.length == 0) return args;
         Object[] actuals = new Object[args.length];
         for (int i = 0; i < args.length; i++) {
             actuals[i] = TypeUtils.cast(args[i], parameterTypes[i]);

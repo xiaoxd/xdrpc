@@ -19,36 +19,35 @@ import org.springframework.web.bind.annotation.RestController;
 @Import(ProviderConfig.class)
 public class XdrpcDemoProviderApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(XdrpcDemoProviderApplication.class, args);
-	}
+    @Autowired
+    ProviderInvoker invoke;
 
-	@Autowired
-	ProviderInvoker invoke;
+    public static void main(String[] args) {
+        SpringApplication.run(XdrpcDemoProviderApplication.class, args);
+    }
 
-	// 使用http + json实现序列化和通信
-	@RequestMapping("/")
-	public RpcResponse invoke(@RequestBody RpcRequest request) {
-		return invoke.invoke(request);
-	}
+    // 使用http + json实现序列化和通信
+    @RequestMapping("/")
+    public RpcResponse invoke(@RequestBody RpcRequest request) {
+        return invoke.invoke(request);
+    }
 
-	@Bean
-	ApplicationRunner providerRunner()
-	{
-		return x-> {
-			RpcRequest request = new RpcRequest();
-			request.setService("cn.xxd.xdrpc.demo.api.UserService");
-			request.setMethodSign("findById@1_int");
-			request.setArgs(new Integer[] {100});
-			RpcResponse response = invoke(request);
-			System.out.println(response.getData());
+    @Bean
+    ApplicationRunner providerRunner() {
+        return x -> {
+            RpcRequest request = new RpcRequest();
+            request.setService("cn.xxd.xdrpc.demo.api.UserService");
+            request.setMethodSign("findById@1_int");
+            request.setArgs(new Integer[]{100});
+            RpcResponse response = invoke(request);
+            System.out.println(response.getData());
 
 
-			request.setService("cn.xxd.xdrpc.demo.api.UserService");
-			request.setMethodSign("findById@2_int_java.lang.String");
-			request.setArgs(new Object[] {100, "xiaoxd"});
-			response = invoke(request);
-			System.out.println(response.getData());
-		};
-	}
+            request.setService("cn.xxd.xdrpc.demo.api.UserService");
+            request.setMethodSign("findById@2_int_java.lang.String");
+            request.setArgs(new Object[]{100, "xiaoxd"});
+            response = invoke(request);
+            System.out.println(response.getData());
+        };
+    }
 }

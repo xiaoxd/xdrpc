@@ -22,9 +22,8 @@ import java.util.Map;
 @Data
 public class ProviderBootstrap implements ApplicationContextAware {
 
-    private ApplicationContext applicationContext;
     RegisterCenter rc;
-
+    private ApplicationContext applicationContext;
     private LinkedMultiValueMap<String, ProviderMeta> skeletons = new LinkedMultiValueMap<>();
     private InstanceMeta instance;
     @Value("${server.port}")
@@ -76,24 +75,18 @@ public class ProviderBootstrap implements ApplicationContextAware {
         return ServiceMeta.builder().app(app).namespace(namespace).env(env).version(version).name(service).build();
     }
 
-    private void getInterface(Object x) {
-        Class<?> inter = x.getClass().getInterfaces()[0];
-        Method[] methods = inter.getMethods();
+    private void getInterface(Object serviceImpl) {
+        Class<?> serviceClass = serviceImpl.getClass().getInterfaces()[0];
+        Method[] methods = serviceClass.getMethods();
         for (Method method : methods) {
-            if(MethodUtils.checkLocalMethod(method.getName())) {
-                continue;
-            }
-            ProviderMeta provider = createProvider(inter, x, method);
-            skeletons.add(inter.getCanonicalName(), provider);
+            if (MethodUtils.checkLocalMethod(method.getName())) continue;
+            createProvider(serviceClass, serviceImpl, method);
         }
     }
 
-    private ProviderMeta createProvider(Class<?> inter, Object x, Method method) {
-        ProviderMeta providerMeta = new ProviderMeta();
-        providerMeta.setMethod(method);
-        providerMeta.setServiceImpl(x);
-        providerMeta.setMethodSign(MethodUtils.methodSign(method));
+    private void createProvider(Class<?> serviceClass, Object serviceImpl, Method method) {
+        ProviderMeta providerMeta = ProviderMeta.builder().method(method).serviceImpl(serviceImpl).methodSign(MethodUtils.methodSign(method)).build();
         System.out.println(providerMeta);
-        return providerMeta;
+        skeletons.add(serviceClass.getCanonicalName(), providerMeta);
     }
 }

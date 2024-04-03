@@ -14,6 +14,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     @Autowired
     Environment environment;
+
     @Override
     public User findById(int id) {
         return new User(id, "xxd-" + environment.getProperty("server.port") +
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int[] getIDs() {
-        return new int[] {1,2,3};
+        return new int[]{1, 2, 3};
     }
 
     @Override
@@ -63,7 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long[] getLongIDs() {
-        return new long[] {11,22,33};
+        return new long[]{11, 22, 33};
     }
 
     @Override

@@ -8,25 +8,31 @@ import java.util.List;
 
 /**
  * RegisterCenter
+ *
  * @author xiaoxd
  * @create 2024-03-30
  */
 public interface RegisterCenter {
     void start();
+
     void stop();
 
     //provider
     void register(ServiceMeta service, InstanceMeta instance);
+
     void unRegister(ServiceMeta service, InstanceMeta instance);
+
     String discover(ServiceMeta service);
 
     //consumer
     List<InstanceMeta> fetchAll(ServiceMeta service);
+
     void subscribe(ServiceMeta service, ChangedListener listener);
 
     class StaticRegisterCenter implements RegisterCenter {
 
         List<InstanceMeta> providers;
+
         public StaticRegisterCenter(List<InstanceMeta> providers) {
             this.providers = providers;
         }

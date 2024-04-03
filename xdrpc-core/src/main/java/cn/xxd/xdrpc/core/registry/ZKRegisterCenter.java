@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 服务提供者
@@ -28,6 +27,7 @@ public class ZKRegisterCenter implements RegisterCenter {
     @Value("${xdrpc.zkRoot}")
     String zkRoot;
     private CuratorFramework client = null;
+
     @Override
     public void start() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
@@ -51,7 +51,7 @@ public class ZKRegisterCenter implements RegisterCenter {
     public void register(ServiceMeta service, InstanceMeta instance) {
         String servicePath = service.toPath();
         try {
-            if(client.checkExists().forPath(servicePath) == null) {
+            if (client.checkExists().forPath(servicePath) == null) {
                 //创建服务的持久化节点
                 client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, "service".getBytes());
             }
@@ -69,7 +69,7 @@ public class ZKRegisterCenter implements RegisterCenter {
         String servicePath = service.toPath();
         try {
             //判断服务是否存在
-            if(client.checkExists().forPath(servicePath) == null) {
+            if (client.checkExists().forPath(servicePath) == null) {
                 return;
             }
             //删除实例的临时节点

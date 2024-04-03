@@ -31,5 +31,7 @@ public class ProviderConfig {
     }
 
     @Bean
-    public RegisterCenter provider_rc() { return new ZKRegisterCenter(); }
+    public RegisterCenter provider_rc() {
+        return new ZKRegisterCenter();
+    }
 }
