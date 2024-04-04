@@ -6,6 +6,7 @@ import cn.xxd.xdrpc.core.api.Router;
 import cn.xxd.xdrpc.core.cluster.RoundRibonLoadBalancer;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.registry.ZKRegisterCenter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 
 @Configurable
+@Slf4j
 public class ConsumerConfig {
 
     @Value("${xdrpc.providers}")
@@ -28,9 +30,9 @@ public class ConsumerConfig {
     @Order(Integer.MIN_VALUE)
     public ApplicationRunner consumerBootstrapRunner(@Autowired ConsumerBootstrap consumerBootstrap) {
         return x -> {
-            System.out.println("consumer start - begin");
+            log.info("consumer start - begin");
             consumerBootstrap.start();
-            System.out.println("consumer start - end");
+            log.info("consumer start - end");
         };
     }
 

@@ -10,3 +10,8 @@ app:
   namespace: public
   env: dev
   version: v1.0
+
+logging:
+  level:
+    root: error
+    cn.xxd.xdrpc: info

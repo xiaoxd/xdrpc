@@ -8,6 +8,7 @@ import cn.xxd.xdrpc.core.api.RpcContext;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.meta.ServiceMeta;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -23,6 +24,7 @@ import java.util.Map;
 import static cn.xxd.xdrpc.core.util.MethodUtils.findAnnotatedField;
 
 @Data
+@Slf4j
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 
     Environment environment;
@@ -78,10 +80,10 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         ServiceMeta serviceMeta = toServiceMeta(serviceName);
         List<InstanceMeta> nodes = rc.fetchAll(serviceMeta);
         if (nodes == null || nodes.isEmpty()) {
-            System.err.println("no provider found for " + serviceName);
+            log.error("no provider found for " + serviceName);
             return null;
         }
-        System.out.println("maps to providers: " + serviceName);
+        log.info("maps to providers: " + serviceName);
         nodes.forEach(System.out::println);
         rc.subscribe(serviceMeta, event -> {
             nodes.clear();

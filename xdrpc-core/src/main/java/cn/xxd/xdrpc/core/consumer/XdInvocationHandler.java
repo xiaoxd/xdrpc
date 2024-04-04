@@ -7,11 +7,13 @@ import cn.xxd.xdrpc.core.consumer.http.OkHttpInvoker;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import cn.xxd.xdrpc.core.util.TypeUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
 
+@Slf4j
 public class XdInvocationHandler implements InvocationHandler {
     Class<?> service;
     private HttpInvoker httpInvoker = new OkHttpInvoker();
@@ -38,9 +40,9 @@ public class XdInvocationHandler implements InvocationHandler {
 
         List<InstanceMeta> instances = context.getRouter().route(providers);
         InstanceMeta instance = context.getLoadBalancer().choose(instances);
-        System.out.println("Load balance url: " + instance);
+        log.debug("Load balance url: " + instance);
         RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
-        System.out.println(rpcResponse);
+        log.debug(String.valueOf(rpcResponse));
         //成功或者失败
         if (rpcResponse.isStatus()) {
             return TypeUtils.castMethodResult(method, rpcResponse.getData());

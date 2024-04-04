@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -20,6 +21,7 @@ import java.net.InetAddress;
 import java.util.Map;
 
 @Data
+@Slf4j
 public class ProviderBootstrap implements ApplicationContextAware {
 
     RegisterCenter rc;
@@ -55,7 +57,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     @PreDestroy
     public void stop() {
-        System.out.println("ProviderBootstrap stop, unregister all services");
+        log.info("ProviderBootstrap stop, unregister all services");
         skeletons.keySet().forEach(this::unRegisterService);
         rc.stop();
     }
@@ -86,7 +88,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     private void createProvider(Class<?> serviceClass, Object serviceImpl, Method method) {
         ProviderMeta providerMeta = ProviderMeta.builder().method(method).serviceImpl(serviceImpl).methodSign(MethodUtils.methodSign(method)).build();
-        System.out.println(providerMeta);
+        log.info(String.valueOf(providerMeta));
         skeletons.add(serviceClass.getCanonicalName(), providerMeta);
     }
 }

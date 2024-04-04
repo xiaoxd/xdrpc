@@ -2,6 +2,7 @@ package cn.xxd.xdrpc.core.provider;
 
 import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.registry.ZKRegisterCenter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.boot.ApplicationRunner;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 
 @Configurable
+@Slf4j
 public class ProviderConfig {
     @Bean
     ProviderBootstrap providerBootstrap() {
@@ -24,9 +26,9 @@ public class ProviderConfig {
     @Order(Integer.MIN_VALUE)
     public ApplicationRunner providerBootstrapRunner(@Autowired ProviderBootstrap providerBootstrap) {
         return x -> {
-            System.out.println("provider start - begin");
+            log.info("provider start - begin");
             providerBootstrap.start();
-            System.out.println("provider start - end");
+            log.info("provider start - end");
         };
     }
 
