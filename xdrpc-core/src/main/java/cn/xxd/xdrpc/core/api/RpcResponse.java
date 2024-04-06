@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RpcResponse<T> {
-    private boolean status; //çŠ¶æ€ï¼štrue
-    private T data;         //æ•°æ®ï¼šnew User
+    private boolean status; //×´Ì¬£ºtrue
+    private T data;         //Êı¾İ£ºnew User
     private Exception ex;
 }

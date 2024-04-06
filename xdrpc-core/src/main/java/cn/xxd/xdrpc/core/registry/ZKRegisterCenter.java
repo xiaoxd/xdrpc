@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * æœåŠ¡æä¾›è€…
+ * ·şÎñÌá¹©Õß
  */
 @Slf4j
 public class ZKRegisterCenter implements RegisterCenter {
@@ -54,10 +54,10 @@ public class ZKRegisterCenter implements RegisterCenter {
         String servicePath = service.toPath();
         try {
             if (client.checkExists().forPath(servicePath) == null) {
-                //åˆ›å»ºæœåŠ¡çš„æŒä¹…åŒ–èŠ‚ç‚¹
+                //´´½¨·şÎñµÄ³Ö¾Ã»¯½Úµã
                 client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, "service".getBytes());
             }
-            //åˆ›å»ºå®ä¾‹çš„ä¸´æ—¶èŠ‚ç‚¹
+            //´´½¨ÊµÀıµÄÁÙÊ±½Úµã
             String instancePath = servicePath + "/" + instance.toPath();
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
             log.info("Register to ZK: " + service + " - " + instance + " success!");
@@ -70,11 +70,11 @@ public class ZKRegisterCenter implements RegisterCenter {
     public void unRegister(ServiceMeta service, InstanceMeta instance) {
         String servicePath = service.toPath();
         try {
-            //åˆ¤æ–­æœåŠ¡æ˜¯å¦å­˜åœ¨
+            //ÅĞ¶Ï·şÎñÊÇ·ñ´æÔÚ
             if (client.checkExists().forPath(servicePath) == null) {
                 return;
             }
-            //åˆ é™¤å®ä¾‹çš„ä¸´æ—¶èŠ‚ç‚¹
+            //É¾³ıÊµÀıµÄÁÙÊ±½Úµã
             String instancePath = servicePath + "/" + instance.toPath();
             client.delete().quietly().forPath(instancePath);
             log.info("unRegister from ZK: " + service + " - " + instance + " success!");

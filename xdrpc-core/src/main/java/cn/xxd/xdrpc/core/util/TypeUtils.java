@@ -63,7 +63,7 @@ public class TypeUtils {
     }
 
     public static Object castMethodResult(Method method, Object data) {
-        //å…¼å®¹éjsonçš„åŸºæœ¬ç±»å‹
+        //¼æÈİ·ÇjsonµÄ»ù±¾ÀàĞÍ
         Class<?> type = method.getReturnType();
         Type genericReturnType = method.getGenericReturnType();
         if (data instanceof JSONObject jsonObject) {

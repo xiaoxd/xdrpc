@@ -28,7 +28,7 @@ public class XdInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        //å¤„ç†å†…ç½®æ–¹æ³•ï¼Œå¦‚ toString hashCodeç­‰Objectçš„åŸºæœ¬æ–¹æ³•
+        //´¦ÀíÄÚÖÃ·½·¨£¬Èç toString hashCodeµÈObjectµÄ»ù±¾·½·¨
         String methodName = method.getName();
         if (MethodUtils.checkLocalMethod(methodName)) {
             return null;
@@ -43,7 +43,7 @@ public class XdInvocationHandler implements InvocationHandler {
         log.debug("Load balance url: " + instance);
         RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
         log.debug(String.valueOf(rpcResponse));
-        //æˆåŠŸæˆ–è€…å¤±è´¥
+        //³É¹¦»òÕßÊ§°Ü
         if (rpcResponse.isStatus()) {
             return TypeUtils.castMethodResult(method, rpcResponse.getData());
         } else {
