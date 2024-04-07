@@ -1,9 +1,11 @@
 package cn.xxd.xdrpc.core.consumer;
 
+import cn.xxd.xdrpc.core.api.Filter;
 import cn.xxd.xdrpc.core.api.LoadBalancer;
 import cn.xxd.xdrpc.core.api.RegisterCenter;
 import cn.xxd.xdrpc.core.api.Router;
 import cn.xxd.xdrpc.core.cluster.RoundRibonLoadBalancer;
+import cn.xxd.xdrpc.core.filter.CacheFilter;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.registry.ZKRegisterCenter;
 import lombok.extern.slf4j.Slf4j;
@@ -49,5 +51,10 @@ public class ConsumerConfig {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegisterCenter consumer_rc() {
         return new ZKRegisterCenter();
+    }
+
+    @Bean
+    public Filter filter() {
+        return new CacheFilter();
     }
 }

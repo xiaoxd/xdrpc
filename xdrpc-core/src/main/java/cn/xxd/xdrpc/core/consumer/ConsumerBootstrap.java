@@ -1,10 +1,7 @@
 package cn.xxd.xdrpc.core.consumer;
 
 import cn.xxd.xdrpc.core.annotation.XdConsumer;
-import cn.xxd.xdrpc.core.api.LoadBalancer;
-import cn.xxd.xdrpc.core.api.RegisterCenter;
-import cn.xxd.xdrpc.core.api.Router;
-import cn.xxd.xdrpc.core.api.RpcContext;
+import cn.xxd.xdrpc.core.api.*;
 import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.meta.ServiceMeta;
 import lombok.Data;
@@ -44,10 +41,12 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         Router<InstanceMeta> router = applicationContext.getBean(Router.class);
         LoadBalancer<InstanceMeta> loadBalancer = applicationContext.getBean(LoadBalancer.class);
         RegisterCenter rc = applicationContext.getBean(RegisterCenter.class);
+        List<Filter> filters = applicationContext.getBeansOfType(Filter.class).values().stream().toList();
 
         RpcContext context = new RpcContext();
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
+        context.setFilters(filters);
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {

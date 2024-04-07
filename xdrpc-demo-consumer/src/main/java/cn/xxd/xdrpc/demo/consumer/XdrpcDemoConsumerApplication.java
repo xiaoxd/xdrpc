@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class XdrpcDemoConsumerApplication {
 //    }
 
     @GetMapping("/")
-    public User findById(int id) {
+    public User findById(@RequestParam("id") int id) {
         return userService.findById(id);
     }
 
@@ -65,9 +66,9 @@ public class XdrpcDemoConsumerApplication {
 //            System.out.println(Arrays.toString(userService.getLongIDs()));
 //            System.out.println(Arrays.toString(userService.getIDs(new int[] {55, 66})));
 //            System.out.println(Arrays.toString(userService.getLongIDs(new long[] {77, 88})));
-            System.out.println(userService.getUsers(Arrays.asList(
-                    new User(1, "a"),
-                    new User(2, "b"))));
+//            System.out.println(userService.getUsers(Arrays.asList(
+//                    new User(1, "a"),
+//                    new User(2, "b"))));
 
 //            Order order404 = orderService.findById(404);
 //            System.out.println(order404);

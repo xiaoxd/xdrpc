@@ -1,5 +1,6 @@
 package cn.xxd.xdrpc.core.consumer;
 
+import cn.xxd.xdrpc.core.api.Filter;
 import cn.xxd.xdrpc.core.api.RpcContext;
 import cn.xxd.xdrpc.core.api.RpcRequest;
 import cn.xxd.xdrpc.core.api.RpcResponse;
@@ -8,6 +9,7 @@ import cn.xxd.xdrpc.core.meta.InstanceMeta;
 import cn.xxd.xdrpc.core.util.MethodUtils;
 import cn.xxd.xdrpc.core.util.TypeUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -38,11 +40,31 @@ public class XdInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
+        for (Filter filter : this.context.getFilters()) {
+            Object preResponse = filter.preFilter(rpcRequest);
+            if (preResponse != null) {
+                log.debug("Filter pre response: " + preResponse);
+                return preResponse;
+            }
+        }
+
         List<InstanceMeta> instances = context.getRouter().route(providers);
         InstanceMeta instance = context.getLoadBalancer().choose(instances);
         log.debug("Load balance url: " + instance);
         RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
         log.debug(String.valueOf(rpcResponse));
+
+        Object result = castResultResult(method, rpcResponse);
+        for (Filter filter : this.context.getFilters()) {
+            Object filterResult = filter.postFilter(rpcRequest, rpcResponse, result);
+            if (filterResult != null) {
+                return filterResult;
+            }
+        }
+        return result;
+    }
+
+    private Object castResultResult(Method method, RpcResponse<?> rpcResponse) {
         //成功或者失败
         if (rpcResponse.isStatus()) {
             return TypeUtils.castMethodResult(method, rpcResponse.getData());
